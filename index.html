@@ -1,564 +1,370 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>eBay AI Gaming PC Auto-Scanner</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0f3ff',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              900: '#1e1b4b',
-            },
-            cyber: {
-              dark: '#090d16',
-              card: 'rgba(17, 24, 39, 0.75)',
-              accent: '#06b6d4',
-              neon: '#a855f7',
-              success: '#10b981',
-              warning: '#f59e0b',
-              danger: '#ef4444'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto eBay PC Search Bot & FPS Checker</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --card: #151c2c;
+            --accent: #6366f1;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --text: #f8fafc;
+            --subtext: #94a3b8;
         }
-      }
-    }
-  </script>
-  
-  <!-- Fonts & FontAwesome -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
-    body {
-      background-color: #07090e;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
-      background-attachment: fixed;
-      font-family: 'Inter', sans-serif;
-      color: #f3f4f6;
-      -webkit-tap-highlight-color: transparent;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
 
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
 
-    .glass-card {
-      background: rgba(26, 35, 51, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .glass-input {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(8px);
-    }
+        .header h1 {
+            font-size: 1.8rem;
+            margin: 0 0 5px 0;
+        }
 
-    .glass-input:focus {
-      border-color: #a855f7;
-      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-      outline: none;
-    }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--subtext);
+        }
 
-    .glow-purple { box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.4); }
-    .glow-cyan { box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.4); }
-    .glow-emerald { box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4); }
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger);
+            border-radius: 50%;
+        }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-    ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.4); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.8); }
+        .pulse-dot.active {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 1.5s infinite;
+        }
 
-    .pulse-live {
-      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-      animation: pulse-green 2s infinite;
-    }
-    @keyframes pulse-green {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-  </style>
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .controls-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #fff;
+        }
+
+        .btn-start { background: var(--success); }
+        .btn-stop { background: var(--danger); }
+        .btn-clear { background: #334155; }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .feed-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .pc-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid #1e293b;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .pc-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .pc-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #38bdf8;
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .badge-extreme { background: #8b5cf6; color: #fff; }
+        .badge-good { background: var(--success); color: #fff; }
+        .badge-ok { background: var(--warning); color: #000; }
+        .badge-bad { background: var(--danger); color: #fff; }
+
+        .fps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .fps-box {
+            background: #090d16;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #1e293b;
+        }
+
+        .fps-box div {
+            font-size: 0.75rem;
+            color: var(--subtext);
+        }
+
+        .fps-value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        @media (max-width: 600px) {
+            .fps-grid { grid-template-columns: repeat(2, 1fr); }
+            .controls-card { flex-direction: column; align-items: stretch; }
+        }
+    </style>
 </head>
-<body class="min-h-screen pb-12 flex flex-col antialiased selection:bg-purple-500 selection:text-white">
+<body>
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-white/10 px-4 lg:px-8 py-3.5 mb-6">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center text-white shadow-lg glow-purple">
-          <i class="fa-solid fa-robot text-2xl"></i>
+<div class="container">
+    <div class="header">
+        <h1>🤖 Auto-eBay PC Search Bot & KI Scanner</h1>
+        <div class="status-bar">
+            <span id="dot" class="pulse-dot"></span>
+            <span id="statusText">Bot gestoppt</span>
+        </div>
+    </div>
+
+    <div class="controls-card">
+        <button id="toggleBtn" class="btn btn-start" onclick="toggleBot()">Bot Starten 🚀</button>
+        <div class="slider-group">
+            <label for="interval">Such-Intervall:</label>
+            <input type="range" id="interval" min="2" max="10" value="4" onchange="updateInterval(this.value)">
+            <span id="intervalVal">4s</span>
+        </div>
+        <button class="btn btn-clear" onclick="clearFeed()">Feed Leeren 🗑️</button>
+    </div>
+
+    <div id="feed" class="feed-container">
+        <!-- Gefundene PCs landen hier -->
+    </div>
+</div>
+
+<script>
+let isRunning = false;
+let botInterval = null;
+let searchSpeed = 4000;
+
+// GPU Datenbank
+const GPU_DB = {
+    "rtx 4090": { score: 100, fortnite: 360, gta: 180, roblox: 240, minecraft: 450 },
+    "rtx 4080": { score: 85, fortnite: 300, gta: 160, roblox: 240, minecraft: 380 },
+    "rtx 4070 ti": { score: 75, fortnite: 270, gta: 145, roblox: 240, minecraft: 340 },
+    "rtx 4070": { score: 68, fortnite: 240, gta: 135, roblox: 240, minecraft: 300 },
+    "rtx 4060 ti": { score: 55, fortnite: 200, gta: 110, roblox: 240, minecraft: 250 },
+    "rtx 4060": { score: 48, fortnite: 180, gta: 95, roblox: 240, minecraft: 220 },
+    "rtx 3090": { score: 77, fortnite: 280, gta: 150, roblox: 240, minecraft: 350 },
+    "rtx 3080": { score: 70, fortnite: 250, gta: 140, roblox: 240, minecraft: 310 },
+    "rtx 3070": { score: 58, fortnite: 210, gta: 115, roblox: 240, minecraft: 260 },
+    "rtx 3060 ti": { score: 52, fortnite: 190, gta: 105, roblox: 240, minecraft: 230 },
+    "rtx 3060": { score: 42, fortnite: 160, gta: 90, roblox: 240, minecraft: 200 },
+    "gtx 1660 super": { score: 31, fortnite: 120, gta: 70, roblox: 160, minecraft: 150 },
+    "gtx 1650": { score: 18, fortnite: 70, gta: 45, roblox: 110, minecraft: 90 },
+    "gtx 1060": { score: 22, fortnite: 85, gta: 52, roblox: 125, minecraft: 110 },
+    "rx 7800 xt": { score: 69, fortnite: 245, gta: 135, roblox: 240, minecraft: 310 },
+    "rx 6700 xt": { score: 53, fortnite: 195, gta: 105, roblox: 240, minecraft: 240 },
+    "rx 6600": { score: 39, fortnite: 145, gta: 80, roblox: 200, minecraft: 180 },
+    "rx 580": { score: 20, fortnite: 80, gta: 48, roblox: 120, minecraft: 100 }
+};
+
+// Testangebote-Simulator
+const MOCK_LISTINGS = [
+    { title: "Gaming PC RTX 3060 Ryzen 5 5600 16GB RAM SSD", price: 420 },
+    { title: "Highend PC RTX 4070 i7 13700K 32GB DDR5", price: 850 },
+    { title: "Einsteiger PC GTX 1650 i5 10400F Top Zustand", price: 380 },
+    { title: "Gaming Monster RTX 4090 i9 14900K", price: 1950 },
+    { title: "Budget Gaming PC RX 6600 Ryzen 5 3600", price: 320 },
+    { title: "Gaming PC RTX 3070 Ti i7 11700K SSD", price: 550 },
+    { title: "PC GTX 1060 6GB i5 8400 16GB", price: 290 },
+    { title: "AMD Gaming PC RX 6700 XT Ryzen 7 5700X", price: 490 }
+];
+
+function toggleBot() {
+    const btn = document.getElementById("toggleBtn");
+    const dot = document.getElementById("dot");
+    const status = document.getElementById("statusText");
+
+    if (!isRunning) {
+        isRunning = true;
+        btn.innerText = "Bot Stoppen 🛑";
+        btn.className = "btn btn-stop";
+        dot.className = "pulse-dot active";
+        status.innerText = "Sucht aktiv auf eBay...";
+        fetchNewPcs();
+        botInterval = setInterval(fetchNewPcs, searchSpeed);
+    } else {
+        isRunning = false;
+        btn.innerText = "Bot Starten 🚀";
+        btn.className = "btn btn-start";
+        dot.className = "pulse-dot";
+        status.innerText = "Bot gestoppt";
+        clearInterval(botInterval);
+    }
+}
+
+function updateInterval(val) {
+    document.getElementById("intervalVal").innerText = val + "s";
+    searchSpeed = val * 1000;
+    if (isRunning) {
+        clearInterval(botInterval);
+        botInterval = setInterval(fetchNewPcs, searchSpeed);
+    }
+}
+
+function parseGPU(title) {
+    let text = title.toLowerCase();
+    const sorted = Object.keys(GPU_DB).sort((a,b) => b.length - a.length);
+    for (let gpu of sorted) {
+        if (text.includes(gpu)) return { name: gpu.toUpperCase(), data: GPU_DB[gpu] };
+    }
+    return null;
+}
+
+function fetchNewPcs() {
+    const randomItem = MOCK_LISTINGS[Math.floor(Math.random() * MOCK_LISTINGS.length)];
+    // Preis leicht variieren
+    const price = randomItem.price + Math.floor(Math.random() * 40) - 20; 
+    addPcToFeed(randomItem.title, price);
+}
+
+function addPcToFeed(title, price) {
+    const feed = document.getElementById("feed");
+    const gpuMatch = parseGPU(title);
+
+    let badgeText = "❌ UNBEKANNT";
+    let badgeClass = "badge-bad";
+    let fps = { fortnite: "?", gta: "?", roblox: "?", minecraft: "?" };
+
+    if (gpuMatch) {
+        const gpu = gpuMatch.data;
+        fps = gpu;
+        const ratio = (gpu.score / price) * 1000;
+
+        if (ratio >= 110) {
+            badgeText = "🔥 EXTREMER DEAL! KAUFEN! 🏆";
+            badgeClass = "badge-extreme";
+        } else if (ratio >= 75) {
+            badgeText = "✅ GUTER DEAL 💪";
+            badgeClass = "badge-good";
+        } else if (ratio >= 50) {
+            badgeText = "⚠️ OKAYER DEAL 🤔";
+            badgeClass = "badge-ok";
+        } else {
+            badgeText = "💀 OVERPRICED ⚰️";
+            badgeClass = "badge-bad";
+        }
+    }
+
+    const card = document.createElement("div");
+    card.className = "pc-card";
+    card.innerHTML = `
+        <div class="pc-header">
+            <h3 class="pc-title">${title}</h3>
+            <span class="pc-price">${price} €</span>
         </div>
         <div>
-          <h1 class="text-xl lg:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400">
-            eBay Auto-PC Scanner
-          </h1>
-          <p class="text-xs text-gray-400 font-mono flex items-center gap-2">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-live"></span>
-            Automatischer Live-Suchbot für iPad
-          </p>
-        </div>
-      </div>
-
-      <!-- Controls Right -->
-      <div class="flex items-center gap-3">
-        <button id="toggleScannerBtn" onclick="toggleScanner()" class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 glow-emerald active:scale-95">
-          <i class="fa-solid fa-play text-xs" id="scannerIcon"></i>
-          <span id="scannerBtnText">Bot Starten</span>
-        </button>
-        <button onclick="fetchNewListings(true)" class="p-2.5 rounded-xl glass-input hover:bg-slate-700/60 text-purple-300 transition-all active:rotate-180" title="Sofort neu suchen">
-          <i class="fa-solid fa-rotate-right"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 lg:px-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-    <!-- LEFT COLUMN: Search & Filter Settings (4 Cols on LG) -->
-    <section class="lg:col-span-4 flex flex-col gap-5">
-      
-      <!-- Auto-Bot Control Panel -->
-      <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-purple-400"></i> Bot-Einstellungen
-          </h2>
-          <span id="botStatusBadge" class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase bg-slate-800 text-gray-400 border border-white/10">
-            Pausiert
-          </span>
-        </div>
-
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1">Maximaler Preis (€)</label>
-            <input type="number" id="maxPriceInput" value="1200" step="50" onchange="applyFilters()" 
-              class="w-full rounded-xl glass-input p-3 text-sm font-mono text-white">
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1">Mindest-Bewertung</label>
-            <select id="minRatingFilter" onchange="applyFilters()" class="w-full rounded-xl glass-input p-3 text-sm text-white">
-              <option value="all">Alle Angebote anzeigen</option>
-              <option value="good" selected>Mindestens "GUT" oder "EXTREM GUT"</option>
-              <option value="extreme">Nur "EXTREM GUT" (Schnäppchen)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1">Suchintervall (Sekunden)</label>
-            <div class="flex items-center gap-3">
-              <input type="range" id="intervalSlider" min="3" max="30" value="5" oninput="updateIntervalLabel(this.value)" class="w-full accent-purple-500">
-              <span id="intervalLabel" class="text-xs font-mono font-bold text-purple-300 w-12 text-right">5s</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Real-time Bot Log -->
-      <div class="glass-panel rounded-2xl p-5 flex-1 flex flex-col min-h-[220px]">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-            <i class="fa-solid fa-terminal text-cyan-400"></i> Live Bot-Protokoll
-          </h3>
-          <button onclick="clearLogs()" class="text-[10px] text-gray-500 hover:text-gray-300">
-            Leeren
-          </button>
-        </div>
-        <div id="logConsole" class="flex-1 bg-slate-950/80 rounded-xl p-3 font-mono text-[11px] text-gray-300 overflow-y-auto max-h-[250px] space-y-1.5 border border-white/5">
-          <div class="text-purple-400">[System] Bot bereit. Klicke "Bot Starten", um eBay automatisch zu durchsuchen.</div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- RIGHT COLUMN: Auto-Discovered Listings Feed (8 Cols on LG) -->
-    <section class="lg:col-span-8 flex flex-col gap-5">
-      
-      <!-- Stats Bar -->
-      <div class="grid grid-cols-3 gap-3">
-        <div class="glass-panel p-3.5 rounded-2xl text-center">
-          <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Gefundene PCs</span>
-          <span id="statTotalFound" class="text-xl font-black font-mono text-white">0</span>
-        </div>
-        <div class="glass-panel p-3.5 rounded-2xl text-center">
-          <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Gute Deals</span>
-          <span id="statGoodDeals" class="text-xl font-black font-mono text-emerald-400">0</span>
-        </div>
-        <div class="glass-panel p-3.5 rounded-2xl text-center">
-          <span class="text-[10px] font-bold uppercase text-gray-400 block mb-1">Ø FPS Fortnite</span>
-          <span id="statAvgFps" class="text-xl font-black font-mono text-cyan-400">0</span>
-        </div>
-      </div>
-
-      <!-- Feed Container Header -->
-      <div class="flex items-center justify-between">
-        <h2 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-fire text-amber-400"></i> Live-Gefundene Angebote auf eBay
-        </h2>
-        <span class="text-xs text-gray-400 font-mono" id="lastUpdatedTime">Zuletzt aktualisiert: -</span>
-      </div>
-
-      <!-- Feed Cards List -->
-      <div id="listingsFeed" class="space-y-4">
-        <!-- Empty Placeholder -->
-        <div id="emptyFeedState" class="glass-panel rounded-2xl p-8 text-center">
-          <i class="fa-solid fa-magnifying-glass-location text-4xl text-purple-400/50 mb-3"></i>
-          <p class="text-sm text-gray-300 font-medium">Der Bot sucht im Hintergrund automatisch nach neuen Angeboten...</p>
-          <p class="text-xs text-gray-500 mt-1">Gefundene PCs erscheinen hier in Echtzeit mit FPS-Analyse!</p>
-        </div>
-      </div>
-
-    </section>
-
-  </main>
-
-  <script>
-    /* ==========================================================================
-       GIGANTIC HARDWARE DATABASE (GPUs & CPUs)
-       ========================================================================== */
-    const GPU_DATABASE = {
-      // RTX 40 Serie
-      "rtx 4090": { score: 100, val: 1600, fortnite: 420, gta: 180, roblox: 240, minecraft: 450 },
-      "rtx 4080 super": { score: 88, val: 980, fortnite: 340, gta: 165, roblox: 240, minecraft: 400 },
-      "rtx 4080": { score: 85, val: 900, fortnite: 320, gta: 160, roblox: 240, minecraft: 380 },
-      "rtx 4070 ti super": { score: 78, val: 750, fortnite: 290, gta: 150, roblox: 240, minecraft: 350 },
-      "rtx 4070 ti": { score: 75, val: 680, fortnite: 280, gta: 145, roblox: 240, minecraft: 340 },
-      "rtx 4070 super": { score: 72, val: 590, fortnite: 260, gta: 140, roblox: 240, minecraft: 320 },
-      "rtx 4070": { score: 68, val: 520, fortnite: 240, gta: 135, roblox: 240, minecraft: 300 },
-      "rtx 4060 ti": { score: 55, val: 380, fortnite: 200, gta: 110, roblox: 240, minecraft: 250 },
-      "rtx 4060": { score: 48, val: 290, fortnite: 180, gta: 95, roblox: 240, minecraft: 220 },
-
-      // RTX 30 Serie
-      "rtx 3090 ti": { score: 80, val: 780, fortnite: 300, gta: 155, roblox: 240, minecraft: 360 },
-      "rtx 3090": { score: 77, val: 680, fortnite: 280, gta: 150, roblox: 240, minecraft: 350 },
-      "rtx 3080 ti": { score: 74, val: 520, fortnite: 260, gta: 145, roblox: 240, minecraft: 330 },
-      "rtx 3080": { score: 70, val: 430, fortnite: 250, gta: 140, roblox: 240, minecraft: 310 },
-      "rtx 3070 ti": { score: 62, val: 340, fortnite: 220, gta: 120, roblox: 240, minecraft: 270 },
-      "rtx 3070": { score: 58, val: 290, fortnite: 210, gta: 115, roblox: 240, minecraft: 260 },
-      "rtx 3060 ti": { score: 52, val: 240, fortnite: 190, gta: 105, roblox: 240, minecraft: 230 },
-      "rtx 3060": { score: 42, val: 190, fortnite: 160, gta: 90, roblox: 240, minecraft: 200 },
-      "rtx 3050": { score: 30, val: 130, fortnite: 110, gta: 65, roblox: 180, minecraft: 150 },
-
-      // GTX Serie
-      "gtx 1080 ti": { score: 46, val: 170, fortnite: 170, gta: 95, roblox: 240, minecraft: 210 },
-      "gtx 1080": { score: 38, val: 130, fortnite: 140, gta: 80, roblox: 200, minecraft: 180 },
-      "gtx 1070 ti": { score: 35, val: 110, fortnite: 130, gta: 75, roblox: 180, minecraft: 160 },
-      "gtx 1070": { score: 32, val: 95, fortnite: 120, gta: 70, roblox: 170, minecraft: 150 },
-      "gtx 1660 super": { score: 31, val: 100, fortnite: 120, gta: 70, roblox: 160, minecraft: 150 },
-      "gtx 1660 ti": { score: 32, val: 105, fortnite: 125, gta: 72, roblox: 165, minecraft: 155 },
-      "gtx 1660": { score: 28, val: 85, fortnite: 105, gta: 62, roblox: 150, minecraft: 135 },
-      "gtx 1650 super": { score: 25, val: 75, fortnite: 95, gta: 55, roblox: 140, minecraft: 120 },
-      "gtx 1650": { score: 18, val: 60, fortnite: 70, gta: 45, roblox: 110, minecraft: 90 },
-      "gtx 1060": { score: 22, val: 65, fortnite: 85, gta: 52, roblox: 125, minecraft: 110 },
-      "gtx 970": { score: 21, val: 45, fortnite: 80, gta: 50, roblox: 120, minecraft: 100 },
-      "gtx 750 ti": { score: 8, val: 25, fortnite: 35, gta: 25, roblox: 60, minecraft: 50 },
-
-      // AMD RX Serie
-      "rx 7900 xtx": { score: 92, val: 850, fortnite: 340, gta: 175, roblox: 240, minecraft: 420 },
-      "rx 7900 xt": { score: 82, val: 680, fortnite: 290, gta: 155, roblox: 240, minecraft: 370 },
-      "rx 7800 xt": { score: 69, val: 460, fortnite: 245, gta: 135, roblox: 240, minecraft: 310 },
-      "rx 7700 xt": { score: 58, val: 380, fortnite: 210, gta: 115, roblox: 240, minecraft: 260 },
-      "rx 7600": { score: 44, val: 220, fortnite: 165, gta: 90, roblox: 220, minecraft: 200 },
-      "rx 6800 xt": { score: 67, val: 380, fortnite: 240, gta: 130, roblox: 240, minecraft: 300 },
-      "rx 6700 xt": { score: 53, val: 250, fortnite: 195, gta: 105, roblox: 240, minecraft: 240 },
-      "rx 6600 xt": { score: 43, val: 180, fortnite: 160, gta: 88, roblox: 220, minecraft: 195 },
-      "rx 6600": { score: 39, val: 150, fortnite: 145, gta: 80, roblox: 200, minecraft: 180 },
-      "rx 580": { score: 20, val: 55, fortnite: 80, gta: 48, roblox: 120, minecraft: 100 },
-
-      // Intel Arc
-      "arc a770": { score: 47, val: 230, fortnite: 175, gta: 95, roblox: 230, minecraft: 210 },
-      "arc a750": { score: 42, val: 180, fortnite: 155, gta: 88, roblox: 210, minecraft: 190 }
-    };
-
-    const CPU_DATABASE = [
-      { keys: ['7800x3d', 'ryzen 7 7800x3d'], name: 'Ryzen 7 7800X3D', val: 360, mult: 1.25 },
-      { keys: ['5800x3d', 'ryzen 7 5800x3d'], name: 'Ryzen 7 5800X3D', val: 240, mult: 1.20 },
-      { keys: ['i7 13700', 'i7 14700', 'i7 12700'], name: 'Intel Core i7 (Neu)', val: 220, mult: 1.15 },
-      { keys: ['i5 13400', 'i5 12400', 'i5 13600', 'i5 14600'], name: 'Intel Core i5 (Modern)', val: 140, mult: 1.08 },
-      { keys: ['ryzen 5 5600x', 'ryzen 5 5600', 'ryzen 5 3600'], name: 'AMD Ryzen 5 (Mid)', val: 75, mult: 1.0 },
-      { keys: ['i5 10400', 'i5 11400', 'i5 9400'], name: 'Intel Core i5 (Alt)', val: 60, mult: 0.95 },
-      { keys: ['i7 4790', 'i7 3770', 'i7 6700', 'i7 7700'], name: 'Intel Core i7 (Legacy)', val: 40, mult: 0.80 }
-    ];
-
-    /* Simulated Pool of Real-Looking eBay PC Listings */
-    const EBAY_LISTING_POOL = [
-      { title: "Gaming PC | RTX 3060 12GB | AMD Ryzen 5 5600X | 16GB RAM | 1TB NVMe", price: 390, img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80" },
-      { title: "Highend Gaming PC Intel i7 13700K - RTX 4070 - 32GB DDR5 RAM", price: 920, img: "https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=300&auto=format&fit=crop&q=80" },
-      { title: "Einsteiger Gaming PC GTX 1660 Super | Ryzen 5 3600 | 16GB DDR4", price: 270, img: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=300&auto=format&fit=crop&q=80" },
-      { title: "ゲーミング PC ULTRA RTX 4090 | Ryzen 7 7800X3D | WaKü Wasserkühlung", price: 2100, img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80" },
-      { title: "Gaming PC i7 4790K mit GTX 970 4GB 8GB RAM (Klassiker)", price: 220, img: "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=300&auto=format&fit=crop&q=80" },
-      { title: "Schnäppchen PC RX 6600 8GB | Ryzen 5 5600 | 16GB RAM | SSD Fortnite Top", price: 310, img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80" },
-      { title: "Verkaufe PC RTX 3070 Ti, Ryzen 7 5800X, 32GB RAM, RGB Gehäuse", price: 540, img: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=300&auto=format&fit=crop&q=80" },
-      { title: "Budget PC GTX 1060 6GB - Intel i5 10400F - 16GB RAM - 500GB SSD", price: 195, img: "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=300&auto=format&fit=crop&q=80" },
-      { title: "Mega Gaming PC RTX 4070 Super | Ryzen 7 7800X3D | 32GB DDR5 2TB SSD", price: 1150, img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80" },
-      { title: "PC Gaming Intel i5 12400F - RTX 4060 8GB - 16GB RAM - Top Zustand", price: 520, img: "https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=300&auto=format&fit=crop&q=80" }
-    ];
-
-    let allDiscoveredListings = [];
-    let isScannerRunning = false;
-    let scannerTimer = null;
-    let poolIndex = 0;
-
-    /* Initialize UI */
-    window.addEventListener('DOMContentLoaded', () => {
-      logBot("System gestartet. Bereit für automatischen eBay-Suchlauf.");
-    });
-
-    function toggleScanner() {
-      isScannerRunning = !isScannerRunning;
-      const btnText = document.getElementById('scannerBtnText');
-      const icon = document.getElementById('scannerIcon');
-      const badge = document.getElementById('botStatusBadge');
-      const btn = document.getElementById('toggleScannerBtn');
-
-      if (isScannerRunning) {
-        btnText.innerText = "Bot Stoppen";
-        icon.className = "fa-solid fa-pause text-xs";
-        badge.innerText = "Aktiv sucht...";
-        badge.className = "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
-        btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-red-500/20 text-red-300 border border-red-500/40 active:scale-95";
-        
-        logBot("🚀 Bot gestartet. Durchsuche eBay nach Gaming PCs...");
-        fetchNewListings();
-        scheduleNextScan();
-      } else {
-        btnText.innerText = "Bot Starten";
-        icon.className = "fa-solid fa-play text-xs";
-        badge.innerText = "Pausiert";
-        badge.className = "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase bg-slate-800 text-gray-400 border border-white/10";
-        btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 glow-emerald active:scale-95";
-        
-        clearTimeout(scannerTimer);
-        logBot("⏸️ Bot pausiert.");
-      }
-    }
-
-    function scheduleNextScan() {
-      if (!isScannerRunning) return;
-      const sec = parseInt(document.getElementById('intervalSlider').value) || 5;
-      scannerTimer = setTimeout(() => {
-        fetchNewListings();
-        scheduleNextScan();
-      }, sec * 1000);
-    }
-
-    function updateIntervalLabel(val) {
-      document.getElementById('intervalLabel').innerText = `${val}s`;
-    }
-
-    function parseHardwareAndEvaluate(title, price) {
-      const lower = title.toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ');
-
-      // 1. GPU Detection (Sorted by key length for high accuracy)
-      const gpuKeys = Object.keys(GPU_DATABASE).sort((a, b) => b.length - a.length);
-      let foundGpuKey = gpuKeys.find(k => lower.includes(k));
-      let gpuObj = foundGpuKey ? GPU_DATABASE[foundGpuKey] : null;
-
-      // 2. CPU Detection
-      let cpuObj = CPU_DATABASE.find(cpu => cpu.keys.some(k => lower.includes(k)));
-
-      // Value Calculation
-      let estGpuVal = gpuObj ? gpuObj.val : 70;
-      let estCpuVal = cpuObj ? cpuObj.val : 40;
-      let estTotalValue = estGpuVal + estCpuVal + 110; // Case, RAM, PSU, Storage
-
-      // Rating Formula
-      let ratio = price > 0 ? (estTotalValue / price) : 0;
-      let dealRating = {};
-
-      if (!gpuObj) {
-        dealRating = { key: "unknown", text: "❓ KEINE GPU ERKANNT", class: "bg-gray-800 text-gray-300 border-gray-700" };
-      } else if (ratio >= 1.22) {
-        dealRating = { key: "extreme", text: "🔥 EXTREM GUT (Schnäppchen!)", class: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 glow-emerald" };
-      } else if (ratio >= 0.95) {
-        dealRating = { key: "good", text: "✅ GUT (Faires Angebot)", class: "bg-blue-500/20 text-blue-300 border-blue-500/40" };
-      } else if (ratio >= 0.75) {
-        dealRating = { key: "ok", text: "⚠️ OK (Kein Schnäppchen)", class: "bg-amber-500/20 text-amber-300 border-amber-500/40" };
-      } else {
-        dealRating = { key: "bad", text: "💀 OVERPRICED", class: "bg-red-500/20 text-red-300 border-red-500/40" };
-      }
-
-      // FPS Estimation
-      let cpuMult = cpuObj ? cpuObj.mult : 0.85;
-      let fps = {
-        fortnite: gpuObj ? Math.round(gpuObj.fortnite * cpuMult) : 30,
-        gta: gpuObj ? Math.round(gpuObj.gta * cpuMult) : 25,
-        roblox: gpuObj ? Math.min(240, Math.round(gpuObj.roblox * cpuMult)) : 60,
-        minecraft: gpuObj ? Math.round(gpuObj.minecraft * cpuMult) : 40
-      };
-
-      return {
-        gpuName: foundGpuKey ? foundGpuKey.toUpperCase() : "Unbekannt",
-        cpuName: cpuObj ? cpuObj.name : "Unbekannt",
-        estTotalValue,
-        dealRating,
-        fps
-      };
-    }
-
-    function fetchNewListings(manual = false) {
-      const rawListing = EBAY_LISTING_POOL[poolIndex % EBAY_LISTING_POOL.length];
-      poolIndex++;
-
-      // Slight price variance to simulate dynamic live deals
-      const priceVariation = (Math.random() * 20 - 10);
-      const finalPrice = Math.max(100, Math.round(rawListing.price + priceVariation));
-
-      const analysis = parseHardwareAndEvaluate(rawListing.title, finalPrice);
-
-      const listingItem = {
-        id: Date.now(),
-        title: rawListing.title,
-        price: finalPrice,
-        img: rawListing.img,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        ...analysis
-      };
-
-      allDiscoveredListings.unshift(listingItem);
-
-      logBot(`Gefunden: "${rawListing.title.substring(0, 30)}..." für ${finalPrice}€ -> Rating: ${analysis.dealRating.text}`);
-
-      renderFeed();
-      updateStats();
-
-      document.getElementById('lastUpdatedTime').innerText = `Zuletzt: ${listingItem.timestamp}`;
-    }
-
-    function applyFilters() {
-      renderFeed();
-    }
-
-    function renderFeed() {
-      const feed = document.getElementById('listingsFeed');
-      const maxPrice = parseFloat(document.getElementById('maxPriceInput').value) || 9999;
-      const minRating = document.getElementById('minRatingFilter').value;
-
-      const filtered = allDiscoveredListings.filter(item => {
-        if (item.price > maxPrice) return false;
-        if (minRating === 'good' && !(item.dealRating.key === 'good' || item.dealRating.key === 'extreme')) return false;
-        if (minRating === 'extreme' && item.dealRating.key !== 'extreme') return false;
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        feed.innerHTML = `
-          <div class="glass-panel rounded-2xl p-8 text-center text-gray-400">
-            <i class="fa-solid fa-filter text-3xl mb-2 text-purple-400/50"></i>
-            <p class="text-sm">Keine Angebote für deine aktuellen Filter gefunden.</p>
-          </div>`;
-        return;
-      }
-
-      feed.innerHTML = filtered.map(item => `
-        <div class="glass-panel rounded-2xl p-4 lg:p-5 flex flex-col sm:flex-row gap-4 transition-all hover:border-purple-500/40">
-          <!-- Image -->
-          <div class="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative">
-            <img src="${item.img}" alt="PC" class="w-full h-full object-cover">
-            <span class="absolute bottom-2 left-2 bg-slate-950/80 text-[10px] font-mono font-bold px-2 py-0.5 rounded text-gray-300">
-              ${item.timestamp}
+            <span class="badge ${badgeClass}">${badgeText}</span>
+            <span style="font-size: 0.85rem; color: var(--subtext); margin-left: 8px;">
+                ⚙️️ GPU: ${gpuMatch ? gpuMatch.name : "Keine erkannt"}
             </span>
-          </div>
-
-          <!-- Content -->
-          <div class="flex-1 flex flex-col justify-between">
-            <div>
-              <div class="flex items-start justify-between gap-2 mb-1.5">
-                <span class="text-xs font-extrabold px-2.5 py-1 rounded-full uppercase border ${item.dealRating.class}">
-                  ${item.dealRating.text}
-                </span>
-                <span class="text-xl font-black font-mono text-cyan-400 shrink-0">${item.price} €</span>
-              </div>
-              
-              <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">${escapeHtml(item.title)}</h3>
-
-              <!-- Detected Hardware -->
-              <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-mono text-gray-400">
-                <span><i class="fa-solid fa-desktop text-purple-400 mr-1"></i>${item.gpuName}</span>
-                <span><i class="fa-solid fa-microchip text-cyan-400 mr-1"></i>${item.cpuName}</span>
-                <span class="text-emerald-400">Wert: ~${item.estTotalValue}€</span>
-              </div>
-            </div>
-
-            <!-- FPS Grid -->
-            <div class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-white/5 font-mono text-center">
-              <div class="bg-slate-900/60 rounded-lg p-1.5">
-                <span class="text-[9px] text-gray-400 block">Fortnite</span>
-                <span class="text-xs font-bold text-purple-300">${item.fps.fortnite} FPS</span>
-              </div>
-              <div class="bg-slate-900/60 rounded-lg p-1.5">
-                <span class="text-[9px] text-gray-400 block">GTA V</span>
-                <span class="text-xs font-bold text-amber-300">${item.fps.gta} FPS</span>
-              </div>
-              <div class="bg-slate-900/60 rounded-lg p-1.5">
-                <span class="text-[9px] text-gray-400 block">Roblox</span>
-                <span class="text-xs font-bold text-red-300">${item.fps.roblox} FPS</span>
-              </div>
-              <div class="bg-slate-900/60 rounded-lg p-1.5">
-                <span class="text-[9px] text-gray-400 block">Minecraft</span>
-                <span class="text-xs font-bold text-emerald-300">${item.fps.minecraft} FPS</span>
-              </div>
-            </div>
-          </div>
         </div>
-      `).join('');
-    }
+        <div class="fps-grid">
+            <div class="fps-box"><div>Fortnite</div><div class="fps-value">~${fps.fortnite}</div></div>
+            <div class="fps-box"><div>GTA V</div><div class="fps-value">~${fps.gta}</div></div>
+            <div class="fps-box"><div>Roblox</div><div class="fps-value">~${fps.roblox}</div></div>
+            <div class="fps-box"><div>Minecraft</div><div class="fps-value">~${fps.minecraft}</div></div>
+        </div>
+    `;
 
-    function updateStats() {
-      document.getElementById('statTotalFound').innerText = allDiscoveredListings.length;
-      const goodDeals = allDiscoveredListings.filter(i => i.dealRating.key === 'good' || i.dealRating.key === 'extreme').length;
-      document.getElementById('statGoodDeals').innerText = goodDeals;
+    feed.insertBefore(card, feed.firstChild);
 
-      if (allDiscoveredListings.length > 0) {
-        const sumFps = allDiscoveredListings.reduce((acc, curr) => acc + curr.fps.fortnite, 0);
-        const avg = Math.round(sumFps / allDiscoveredListings.length);
-        document.getElementById('statAvgFps').innerText = `${avg}`;
-      }
+    // Feed begrenzen
+    if (feed.children.length > 15) {
+        feed.removeChild(feed.lastChild);
     }
+}
 
-    function logBot(msg) {
-      const consoleEl = document.getElementById('logConsole');
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.innerHTML = `<span class="text-gray-500">[${time}]</span> ${escapeHtml(msg)}`;
-      consoleEl.appendChild(div);
-      consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
+function clearFeed() {
+    document.getElementById("feed").innerHTML = "";
+}
+</script>
 
-    function clearLogs() {
-      document.getElementById('logConsole').innerHTML = '';
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-  </script>
 </body>
 </html>
